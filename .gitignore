@@ -35,3 +35,6 @@ Thumbs.db
 *.db
 *.db-journal
 dev.db
+
+# Local Netlify folder
+.netlify

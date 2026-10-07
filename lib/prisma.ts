@@ -10,5 +10,7 @@ export const prisma =
     log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
   });
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+// Always maintain a global singleton to prevent exhausting Supabase connection pool limits
+globalForPrisma.prisma = prisma;
+
 export default prisma;
