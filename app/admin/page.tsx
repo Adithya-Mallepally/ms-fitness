@@ -22,65 +22,81 @@ export default async function AdminDashboardPage() {
   const in7Days = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
   const in30Days = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 
-  // Operational KPI metrics
-  const [
-    totalMembers,
-    activeCount,
-    newJoinsThisMonth,
-    expiringIn30Days,
-    expiringIn7Days,
-    expiredCount,
-    recentPayments,
-    recentMembers,
-    allMemberships,
-  ] = await Promise.all([
-    prisma.member.count(),
-    prisma.member.count({ where: { status: "ACTIVE" } }),
-    prisma.membership.count({
-      where: {
-        createdAt: { gte: startOfMonth },
-        source: "NEW_JOIN",
-      },
-    }),
-    prisma.membership.findMany({
-      where: {
-        endDate: { gte: now, lte: in30Days },
-        status: { in: ["ACTIVE", "EXPIRING"] },
-      },
-      include: { member: true, plan: true },
-    }),
-    prisma.membership.findMany({
-      where: {
-        endDate: { gte: now, lte: in7Days },
-        status: { in: ["ACTIVE", "EXPIRING"] },
-      },
-      include: { member: true, plan: true },
-    }),
-    prisma.membership.count({
-      where: {
-        endDate: { lt: now },
-      },
-    }),
-    prisma.payment.findMany({
-      take: 6,
-      orderBy: { paidAt: "desc" },
-      include: { member: true },
-    }),
-    prisma.member.findMany({
-      take: 6,
-      orderBy: { createdAt: "desc" },
-      include: {
-        memberships: {
-          take: 1,
-          orderBy: { createdAt: "desc" },
-          include: { plan: true },
+  // Operational KPI metrics with graceful fallback
+  let totalMembers = 0;
+  let activeCount = 0;
+  let newJoinsThisMonth = 0;
+  let expiringIn30Days: any[] = [];
+  let expiringIn7Days: any[] = [];
+  let expiredCount = 0;
+  let recentPayments: any[] = [];
+  let recentMembers: any[] = [];
+  let allMemberships: any[] = [];
+  let dbError = "";
+
+  try {
+    const results = await Promise.all([
+      prisma.member.count(),
+      prisma.member.count({ where: { status: "ACTIVE" } }),
+      prisma.membership.count({
+        where: {
+          createdAt: { gte: startOfMonth },
+          source: "NEW_JOIN",
         },
-      },
-    }),
-    prisma.membership.findMany({
-      include: { plan: true },
-    }),
-  ]);
+      }),
+      prisma.membership.findMany({
+        where: {
+          endDate: { gte: now, lte: in30Days },
+          status: { in: ["ACTIVE", "EXPIRING"] },
+        },
+        include: { member: true, plan: true },
+      }),
+      prisma.membership.findMany({
+        where: {
+          endDate: { gte: now, lte: in7Days },
+          status: { in: ["ACTIVE", "EXPIRING"] },
+        },
+        include: { member: true, plan: true },
+      }),
+      prisma.membership.count({
+        where: {
+          endDate: { lt: now },
+        },
+      }),
+      prisma.payment.findMany({
+        take: 6,
+        orderBy: { paidAt: "desc" },
+        include: { member: true },
+      }),
+      prisma.member.findMany({
+        take: 6,
+        orderBy: { createdAt: "desc" },
+        include: {
+          memberships: {
+            take: 1,
+            orderBy: { createdAt: "desc" },
+            include: { plan: true },
+          },
+        },
+      }),
+      prisma.membership.findMany({
+        include: { plan: true },
+      }),
+    ]);
+
+    totalMembers = results[0];
+    activeCount = results[1];
+    newJoinsThisMonth = results[2];
+    expiringIn30Days = results[3];
+    expiringIn7Days = results[4];
+    expiredCount = results[5];
+    recentPayments = results[6];
+    recentMembers = results[7];
+    allMemberships = results[8];
+  } catch (err: any) {
+    console.error("Dashboard database query error:", err);
+    dbError = err.message || "Database connection error";
+  }
 
   // Financial aggregates
   const totalRevenue = recentPayments.reduce((acc, p) => acc + p.amount, 0);
