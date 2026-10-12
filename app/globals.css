@@ -1,8 +1,11 @@
+@import url('https://rsms.me/inter/inter.css');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --color-void: #f8f9fb;
   --color-obsidian: #ffffff;
   --color-card: #ffffff;
@@ -11,6 +14,12 @@
   --color-border: rgba(0, 0, 0, 0.08);
   --color-border-light: rgba(0, 0, 0, 0.14);
   --color-foreground: #111113;
+}
+
+@supports (font-variation-settings: normal) {
+  :root {
+    font-family: InterVariable, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
 }
 
 html.dark {
@@ -24,8 +33,9 @@ html.dark {
   --color-foreground: #f4f4f5;
 }
 
-* {
+*, html, body, button, input, select, textarea {
   box-sizing: border-box;
+  font-family: Inter, InterVariable, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 html {
@@ -39,7 +49,7 @@ body {
   background-color: var(--color-void);
   color: var(--color-foreground);
   overflow-x: hidden;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: Inter, InterVariable, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
@@ -338,22 +348,68 @@ html:not(.dark) nav[aria-label="Navigation drawer"] .text-gold-500 {
   color: #ca8a24 !important;
 }
 
-/* Print styles for digital receipts */
+/* Print styles for digital receipts & member joining records */
 @media print {
+  @page {
+    size: A4 portrait;
+    margin: 8mm 10mm;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    width: 100% !important;
+    font-family: Inter, InterVariable, sans-serif !important;
+  }
+
+  /* Hide background elements and navigation */
   body * {
-    visibility: hidden;
+    visibility: hidden !important;
   }
-  #printable-receipt, #printable-receipt * {
-    visibility: visible;
+
+  .print-hidden,
+  .print\:hidden {
+    display: none !important;
+    visibility: hidden !important;
   }
+
+  #printable-receipt,
+  #printable-receipt * {
+    visibility: visible !important;
+    color: #000000 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
   #printable-receipt {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    margin: 0;
-    padding: 20px;
-    background: white !important;
-    color: black !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 16px 20px !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: 1.5px solid #18181b !important;
+    border-radius: 6px !important;
+    box-shadow: none !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    overflow: visible !important;
+    box-sizing: border-box !important;
+    display: block !important;
+  }
+
+  #printable-receipt * {
+    color: #000000 !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
   }
 }

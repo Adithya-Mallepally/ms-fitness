@@ -5,15 +5,17 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { 
   ArrowLeft, 
-  UserPlus, 
   CheckCircle2, 
-  Calendar, 
   CreditCard, 
-  ShieldCheck, 
   AlertCircle,
-  FileText
+  Tag,
+  Copy,
+  Check,
+  Percent,
+  X
 } from "lucide-react";
 import { calculateExpiryDate } from "@/lib/expiry";
+import { STATIC_COUPONS, findCoupon, type DiscountCoupon } from "@/lib/coupons";
 import ReceiptModal from "@/components/admin/ReceiptModal";
 
 interface PlanOption {
@@ -47,6 +49,12 @@ function NewJoiningForm() {
   const [paymentMethod, setPaymentMethod] = useState("UPI");
   const [transactionRef, setTransactionRef] = useState("");
   const [notes, setNotes] = useState("");
+
+  // Coupon State
+  const [couponInput, setCouponInput] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<DiscountCoupon | null>(null);
+  const [couponError, setCouponError] = useState("");
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -83,6 +91,40 @@ function NewJoiningForm() {
     ? calculateExpiryDate(startDate, selectedPlan.durationMonths)
     : null;
 
+  // Pricing & Discount Calculations
+  const basePrice = selectedPlan ? selectedPlan.price : 0;
+  const discountAmount = appliedCoupon
+    ? Math.round((basePrice * appliedCoupon.discountPercent) / 100)
+    : 0;
+  const finalPayable = Math.max(0, basePrice - discountAmount);
+
+  function handleApplyCoupon(code: string) {
+    setCouponError("");
+    const coupon = findCoupon(code);
+    if (!coupon) {
+      setCouponError(`"${code}" is not a valid coupon code. Please choose from available codes below.`);
+      return;
+    }
+    setAppliedCoupon(coupon);
+    setCouponInput(coupon.code);
+  }
+
+  function handleRemoveCoupon() {
+    setAppliedCoupon(null);
+    setCouponInput("");
+    setCouponError("");
+  }
+
+  function handleCopy(code: string) {
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(code);
+    }
+    setCopiedCode(code);
+    setTimeout(() => {
+      setCopiedCode(null);
+    }, 2000);
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErrorMessage("");
@@ -103,6 +145,8 @@ function NewJoiningForm() {
           paymentMethod,
           transactionRef,
           notes,
+          couponCode: appliedCoupon ? appliedCoupon.code : null,
+          discountAmount: discountAmount,
         }),
       });
 
@@ -136,7 +180,7 @@ function NewJoiningForm() {
             NEW MEMBER JOINING
           </h1>
           <p className="text-xs text-zinc-600 dark:text-zinc-400 font-light mt-0.5">
-            Register member profile, enroll membership plan, record payment, and generate receipt.
+            Register member profile, enroll membership plan, apply promo coupons, and generate receipt.
           </p>
         </div>
       </div>
@@ -298,24 +342,186 @@ function NewJoiningForm() {
                 </span>
               </div>
 
-              <div className="text-left sm:text-right">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
-                  Fee Amount Due
+              <div className="text-left sm:text-right space-y-0.5">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 dark:text-zinc-400 block">
+                  Plan Base Fee
                 </span>
-                <p className="font-display text-2xl sm:text-3xl font-black text-gold-600 dark:text-gold-400">
-                  ₹{selectedPlan.price.toLocaleString("en-IN")}
+                <p className="font-display text-xl sm:text-2xl font-black text-zinc-900 dark:text-white">
+                  ₹{basePrice.toLocaleString("en-IN")}
                 </p>
+                {appliedCoupon && (
+                  <p className="text-xs font-mono text-emerald-600 dark:text-emerald-400 font-semibold">
+                    -₹{discountAmount.toLocaleString("en-IN")} ({appliedCoupon.discountPercent}% OFF)
+                  </p>
+                )}
               </div>
             </div>
           )}
         </div>
 
-        {/* Step 3: Payment Recording */}
+        {/* Step 3: Discount Coupon Section */}
         <div className="p-5 sm:p-8 rounded-3xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800/80 shadow-sm dark:shadow-none space-y-6">
-          <h3 className="font-display text-base font-bold uppercase tracking-wider text-zinc-950 dark:text-white flex items-center gap-2">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-gold-500 text-black text-xs font-mono font-bold">3</span>
-            Payment Collection &amp; Receipting
-          </h3>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-zinc-200 dark:border-zinc-800/80">
+            <div>
+              <h3 className="font-display text-base font-bold uppercase tracking-wider text-zinc-950 dark:text-white flex items-center gap-2">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-gold-500 text-black text-xs font-mono font-bold">3</span>
+                Discount Coupons
+              </h3>
+              <p className="text-xs text-zinc-600 dark:text-zinc-400 font-light mt-0.5">
+                Apply a static promotional discount code to reduce the membership fee.
+              </p>
+            </div>
+            {appliedCoupon && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-mono font-bold">
+                <Check className="h-3.5 w-3.5" /> Coupon {appliedCoupon.code} Active
+              </span>
+            )}
+          </div>
+
+          {/* Coupon Input & Manual Apply */}
+          <div className="space-y-3">
+            <label className="block text-xs font-mono uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
+              Enter or Select Coupon Code
+            </label>
+            <div className="flex flex-col sm:flex-row gap-2.5 max-w-md">
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  value={couponInput}
+                  onChange={(e) => {
+                    setCouponInput(e.target.value.toUpperCase());
+                    setCouponError("");
+                  }}
+                  placeholder="e.g. MSF20"
+                  className="w-full rounded-2xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 px-4 py-3 text-xs text-zinc-950 dark:text-white font-mono uppercase focus:outline-none focus:border-gold-500"
+                />
+                {appliedCoupon && (
+                  <button
+                    type="button"
+                    onClick={handleRemoveCoupon}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-red-500"
+                    title="Remove coupon"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => handleApplyCoupon(couponInput)}
+                disabled={!couponInput.trim()}
+                className="px-5 py-3 rounded-2xl bg-gold-500 hover:bg-gold-400 text-black font-display font-bold text-xs uppercase tracking-wider disabled:opacity-40 transition-colors flex-shrink-0"
+              >
+                Apply Coupon
+              </button>
+            </div>
+
+            {couponError && (
+              <p className="text-xs text-red-500 flex items-center gap-1.5 mt-1 font-mono">
+                <AlertCircle className="h-3.5 w-3.5 flex-shrink-0" />
+                <span>{couponError}</span>
+              </p>
+            )}
+          </div>
+
+          {/* Static Available Coupons Grid */}
+          <div className="space-y-3 pt-2">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-500 block">
+              Available Static Coupon Codes (Click to Copy or Apply):
+            </span>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5">
+              {STATIC_COUPONS.map((coupon) => {
+                const isSelected = appliedCoupon?.code === coupon.code;
+                const isCopied = copiedCode === coupon.code;
+
+                return (
+                  <div
+                    key={coupon.code}
+                    className={`relative p-3 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between ${
+                      isSelected
+                        ? "bg-emerald-500/10 border-emerald-500 text-emerald-950 dark:text-emerald-100 shadow-sm"
+                        : "bg-zinc-50 dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800 hover:border-gold-500/50"
+                    }`}
+                    onClick={() => handleApplyCoupon(coupon.code)}
+                  >
+                    <div className="flex items-center justify-between gap-1 mb-2">
+                      <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-gold-500/20 text-gold-600 dark:text-gold-400">
+                        {coupon.label}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCopy(coupon.code);
+                        }}
+                        title="Copy coupon code"
+                        className="p-1 rounded-md text-zinc-400 hover:text-black dark:hover:text-white transition-colors"
+                      >
+                        {isCopied ? (
+                          <Check className="h-3.5 w-3.5 text-emerald-500" />
+                        ) : (
+                          <Copy className="h-3.5 w-3.5" />
+                        )}
+                      </button>
+                    </div>
+
+                    <div>
+                      <p className="font-mono font-bold text-xs tracking-wider text-zinc-950 dark:text-white">
+                        {coupon.code}
+                      </p>
+                      <span className="text-[9px] text-zinc-500 block mt-0.5">
+                        {isCopied ? "Copied!" : isSelected ? "Applied" : "Tap to apply"}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Applied Coupon Savings Banner */}
+          {appliedCoupon && (
+            <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-xl bg-emerald-500 text-black flex items-center justify-center font-bold">
+                  <Percent className="h-4 w-4" />
+                </div>
+                <div>
+                  <p className="font-bold text-xs text-emerald-950 dark:text-emerald-200">
+                    Coupon {appliedCoupon.code} Applied Successfully!
+                  </p>
+                  <p className="text-[11px] text-emerald-800 dark:text-emerald-300">
+                    {appliedCoupon.discountPercent}% discount saving ₹{discountAmount.toLocaleString("en-IN")} on this membership.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleRemoveCoupon}
+                className="text-xs text-emerald-900 dark:text-emerald-200 hover:underline font-mono"
+              >
+                Remove
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Step 4: Payment Recording */}
+        <div className="p-5 sm:p-8 rounded-3xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800/80 shadow-sm dark:shadow-none space-y-6">
+          <div className="flex items-center justify-between pb-2 border-b border-zinc-200 dark:border-zinc-800/80">
+            <h3 className="font-display text-base font-bold uppercase tracking-wider text-zinc-950 dark:text-white flex items-center gap-2">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-gold-500 text-black text-xs font-mono font-bold">4</span>
+              Payment Collection &amp; Receipting
+            </h3>
+            <div className="text-right">
+              <span className="text-[10px] font-mono uppercase text-zinc-500 block">Final Amount Due:</span>
+              <span className="font-display text-lg font-black text-gold-600 dark:text-gold-400">
+                ₹{finalPayable.toLocaleString("en-IN")}
+              </span>
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
             <div>
@@ -377,7 +583,7 @@ function NewJoiningForm() {
             className="inline-flex items-center justify-center gap-2 rounded-full bg-gold-500 px-8 sm:px-10 py-3.5 text-xs font-bold uppercase tracking-widest text-black hover:bg-gold-400 transition-all hover:scale-105 active:scale-95 disabled:opacity-50 shadow-lg text-center"
           >
             <CheckCircle2 className="h-4 w-4" />
-            <span>{submitting ? "Processing..." : "Complete & Print Receipt"}</span>
+            <span>{submitting ? "Processing..." : `Complete & Print Receipt (₹${finalPayable.toLocaleString("en-IN")})`}</span>
           </button>
         </div>
       </form>

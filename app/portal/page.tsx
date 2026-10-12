@@ -32,6 +32,7 @@ interface MemberData {
   email: string | null;
   gender: string;
   status: string;
+  notes?: string | null;
   memberships: {
     id: string;
     startDate: string;
@@ -341,13 +342,17 @@ export default function MemberPortalPage() {
                                   memberName: `${member.firstName} ${member.lastName}`,
                                   memberCode: member.memberCode,
                                   phone: member.phone,
+                                  email: member.email,
+                                  gender: member.gender,
                                   planName: ms.plan.name,
+                                  durationMonths: ms.plan.durationMonths,
                                   amount: p.amount,
                                   paymentMethod: p.paymentMethod,
                                   transactionRef: p.transactionRef,
                                   startDate: ms.startDate,
                                   endDate: ms.endDate,
                                   paidAt: p.paidAt,
+                                  notes: member.notes,
                                 })
                               }
                               className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-zinc-900 text-white dark:bg-zinc-800 dark:text-zinc-200 hover:bg-gold-500 hover:text-black dark:hover:bg-gold-500 dark:hover:text-black transition-colors font-medium shadow-sm"

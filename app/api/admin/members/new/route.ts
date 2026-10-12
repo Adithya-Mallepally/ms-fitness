@@ -16,6 +16,8 @@ export async function POST(req: NextRequest) {
       paymentMethod,
       transactionRef,
       notes,
+      couponCode,
+      discountAmount,
     } = body;
 
     // Validation
@@ -53,7 +55,9 @@ export async function POST(req: NextRequest) {
     }
 
     const priceRecord = plan.prices[0];
-    const amount = priceRecord.price;
+    const baseAmount = priceRecord.price;
+    const validatedDiscount = typeof discountAmount === "number" && discountAmount > 0 ? discountAmount : 0;
+    const finalAmount = Math.max(0, baseAmount - validatedDiscount);
 
     // Calculate expiry date
     const parsedStartDate = new Date(startDate);
@@ -89,24 +93,28 @@ export async function POST(req: NextRequest) {
           priceId: priceRecord.id,
           startDate: parsedStartDate,
           endDate: calculatedEndDate,
-          amountPaid: amount,
+          amountPaid: finalAmount,
           status: "ACTIVE",
           source: "NEW_JOIN",
         },
       });
+
+      const paymentNotes = couponCode
+        ? `Discount coupon ${couponCode} applied (-₹${validatedDiscount}). ${notes || ""}`.trim()
+        : (notes || "Initial registration payment");
 
       const payment = await tx.payment.create({
         data: {
           receiptNo,
           memberId: member.id,
           membershipId: membership.id,
-          amount,
+          amount: finalAmount,
           paymentMethod,
           transactionRef: transactionRef?.trim() || null,
           status: "PAID",
           paidAt: new Date(),
           createdBy: "Front Desk Staff",
-          notes: "Initial registration payment",
+          notes: paymentNotes,
         },
       });
 
@@ -116,7 +124,7 @@ export async function POST(req: NextRequest) {
           action: "MEMBER_CREATED",
           entityType: "Member",
           entityId: member.id,
-          newValue: JSON.stringify({ memberCode, plan: plan.name, amount }),
+          newValue: JSON.stringify({ memberCode, plan: plan.name, amount: finalAmount, couponCode }),
         },
       });
 
@@ -134,13 +142,20 @@ export async function POST(req: NextRequest) {
           memberName: `${result.member.firstName} ${result.member.lastName}`,
           memberCode: result.member.memberCode,
           phone: result.member.phone,
+          email: result.member.email,
+          gender: result.member.gender,
           planName: result.plan.name,
+          durationMonths: result.plan.durationMonths,
           amount: result.payment.amount,
+          originalAmount: baseAmount,
+          discountAmount: validatedDiscount,
+          couponCode: couponCode || null,
           paymentMethod: result.payment.paymentMethod,
           transactionRef: result.payment.transactionRef,
           startDate: result.membership.startDate,
           endDate: result.membership.endDate,
           paidAt: result.payment.paidAt,
+          notes: result.member.notes,
         },
       },
     });

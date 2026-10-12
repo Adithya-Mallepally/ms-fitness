@@ -473,7 +473,7 @@ async function runSuite5() {
     { path: "/admin/members", label: "Member Directory", expectedText: "MEMBER DIRECTORY" },
     { path: "/admin/members/new", label: "Registration Form", expectedText: "Staff ERP" },
     { path: "/admin/plans", label: "Plan Matrix & Fee Versioning", expectedText: "MEMBERSHIP PLANS" },
-    { path: "/admin/renewals", label: "Renewal Pipeline", expectedText: "RENEWAL PIPELINE" },
+    { path: "/admin/renewals", label: "Membership Renewals", expectedText: "MEMBERSHIP RENEWALS" },
     { path: "/admin/payments", label: "Payment Ledger", expectedText: "PAYMENT TRANSACTIONS" },
     { path: "/admin/reports", label: "Financial Reports", expectedText: "OPERATIONAL &amp; FINANCIAL REPORTS" },
     { path: "/admin/settings", label: "System Timings & Settings", expectedText: "SETTINGS &amp; TIMINGS" },

@@ -29,8 +29,9 @@ const config: Config = {
         borderLight: "var(--color-border-light)",
       },
       fontFamily: {
-        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
-        display: ["var(--font-syne)", "var(--font-inter)", "sans-serif"],
+        sans: ["Inter", "InterVariable", "system-ui", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
+        display: ["Inter", "InterVariable", "system-ui", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
+        mono: ["Inter", "InterVariable", "monospace", "sans-serif"],
       },
       letterSpacing: {
         widest: "0.2em",

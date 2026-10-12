@@ -254,7 +254,7 @@ export default function AttendanceScannerPage() {
             Attendance Check-In
           </h1>
           <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 mt-1">
-            Enter a Member ID or phone number to instantly verify membership and record attendance.
+            Enter the 4-digit member number to instantly fetch details and record attendance.
           </p>
         </div>
 
@@ -300,7 +300,7 @@ export default function AttendanceScannerPage() {
                   Member Check-In
                 </h3>
                 <span className="text-[10px] font-mono text-zinc-500 block">
-                  Enter Member ID or Phone Number
+                  Enter 4-Digit Member Number (MSF is Static)
                 </span>
               </div>
             </div>
@@ -309,28 +309,40 @@ export default function AttendanceScannerPage() {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                handleVerifyMember(memberId);
+                if (!memberId.trim()) return;
+                const fullCode = memberId.trim().startsWith("MSF-") ? memberId.trim() : `MSF-${memberId.trim()}`;
+                handleVerifyMember(fullCode);
               }}
               className="space-y-4"
             >
               <div>
                 <label className="text-[11px] font-mono uppercase text-zinc-600 dark:text-zinc-400 font-semibold block mb-1.5">
-                  Member ID / Phone Number
+                  Member Number (4 Digits)
                 </label>
-                <div className="relative">
+                <div className="relative flex items-center rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 overflow-hidden focus-within:border-gold-500 focus-within:ring-1 focus-within:ring-gold-500/20 transition-colors">
+                  {/* Static MSF Prefix */}
+                  <span className="px-3.5 py-3.5 bg-zinc-200 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 font-mono font-bold text-sm tracking-wider select-none border-r border-zinc-300 dark:border-zinc-700">
+                    MSF-
+                  </span>
                   <input
                     ref={inputRef}
                     type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]{4}"
+                    maxLength={4}
                     value={memberId}
-                    onChange={(e) => setMemberId(e.target.value)}
-                    placeholder="e.g. MSF-1001 or 9810012345"
-                    className="w-full pl-4 pr-24 py-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 text-sm text-zinc-950 dark:text-white placeholder-zinc-400 focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500/20 font-mono transition-colors"
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, "").slice(0, 4);
+                      setMemberId(val);
+                    }}
+                    placeholder="1001"
+                    className="w-full pl-3.5 pr-28 py-3.5 bg-transparent text-base font-mono font-bold tracking-widest text-zinc-950 dark:text-white placeholder-zinc-400 focus:outline-none"
                     autoFocus
                     autoComplete="off"
                   />
                   <button
                     type="submit"
-                    disabled={isVerifying || !memberId.trim()}
+                    disabled={isVerifying || memberId.length !== 4}
                     className="absolute right-1.5 top-1.5 bottom-1.5 px-4 rounded-lg bg-gold-500 hover:bg-gold-400 text-black font-display font-bold text-xs uppercase tracking-wider disabled:opacity-40 transition-colors flex items-center gap-1.5"
                   >
                     {isVerifying ? (
@@ -346,7 +358,7 @@ export default function AttendanceScannerPage() {
               </div>
 
               <p className="text-[10px] text-zinc-500 font-mono leading-relaxed">
-                Type the member's MSF code (e.g. <strong>MSF-1001</strong>) or their registered phone number, then press <strong>Enter</strong> or click <strong>Check In</strong>.
+                Type the <strong>4-digit member number</strong> (e.g. <strong>1001</strong>). <strong>MSF-</strong> is kept static. Press <strong>Enter</strong> or click <strong>Check In</strong> to fetch details and record attendance.
               </p>
             </form>
 
@@ -356,15 +368,15 @@ export default function AttendanceScannerPage() {
               <ul className="text-[11px] text-zinc-500 dark:text-zinc-400 space-y-1.5 font-mono">
                 <li className="flex items-start gap-1.5">
                   <span className="text-gold-500 mt-0.5">›</span>
-                  Enter the member's ID card code (MSF-XXXX)
+                  Enter the member&apos;s 4-digit code (e.g. 1001)
                 </li>
                 <li className="flex items-start gap-1.5">
                   <span className="text-gold-500 mt-0.5">›</span>
-                  Or enter their registered 10-digit phone number
+                  The &quot;MSF-&quot; prefix is completely static
                 </li>
                 <li className="flex items-start gap-1.5">
                   <span className="text-gold-500 mt-0.5">›</span>
-                  USB barcode scanners auto-submit on scan
+                  Fetches member profile and logs entry instantly
                 </li>
               </ul>
             </div>
@@ -540,7 +552,7 @@ export default function AttendanceScannerPage() {
                 Ready for Check-In
               </h3>
               <p className="text-xs max-w-sm mx-auto leading-relaxed">
-                Enter a member's ID (e.g. <span className="font-mono font-bold text-gold-600">MSF-1001</span>) or registered phone number in the form on the left to verify and admit them.
+                Enter a member&apos;s 4-digit number (e.g. <span className="font-mono font-bold text-gold-600">1001</span> for MSF-1001) in the form on the left to verify and admit them.
               </p>
             </div>
           )}

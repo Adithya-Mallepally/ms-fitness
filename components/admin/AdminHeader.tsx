@@ -10,7 +10,7 @@ const TITLE_MAP: Record<string, string> = {
   "/admin/attendance": "Entrance Scanner & Attendance",
   "/admin/members": "Member Directory",
   "/admin/members/new": "New Member Joining",
-  "/admin/renewals": "Expiry & Renewal Pipeline",
+  "/admin/renewals": "Membership Renewals",
   "/admin/plans": "Membership Pricing & Rates",
   "/admin/payments": "Payment & Collection Ledger",
   "/admin/reports": "Financial & Operational Reports",

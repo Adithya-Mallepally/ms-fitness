@@ -138,7 +138,7 @@ export default async function AdminDashboardPage() {
             className="inline-flex items-center gap-2 rounded-full bg-zinc-900 text-white dark:bg-zinc-800 dark:text-zinc-200 border border-zinc-700/60 px-5 py-2.5 text-xs font-semibold uppercase tracking-widest hover:bg-gold-500 hover:text-black transition-colors"
           >
             <Clock className="h-4 w-4 text-amber-400" />
-            <span>Renewal Pipeline</span>
+            <span>Renewals</span>
           </Link>
         </div>
       </div>

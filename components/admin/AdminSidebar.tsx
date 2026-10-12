@@ -25,7 +25,7 @@ const NAV_ITEMS = [
   { label: "Entrance Scanner", href: "/admin/attendance", icon: QrCode },
   { label: "Member Directory", href: "/admin/members", icon: Users },
   { label: "New Joining", href: "/admin/members/new", icon: UserPlus },
-  { label: "Expiry & Renewals", href: "/admin/renewals", icon: Clock },
+  { label: "Membership Renewals", href: "/admin/renewals", icon: Clock },
   { label: "Plans & Fee Updates", href: "/admin/plans", icon: Layers },
   { label: "Payment Ledger", href: "/admin/payments", icon: CreditCard },
   { label: "Financial Reports", href: "/admin/reports", icon: BarChart3 },

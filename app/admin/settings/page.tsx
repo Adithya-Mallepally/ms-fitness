@@ -110,7 +110,7 @@ export default async function AdminSettingsPage() {
           {[
             { role: "Super Administrator", email: "admin@msfitness.com", perms: "Full system administration, fee versioning, reports, audit logs" },
             { role: "Receptionist", email: "reception@msfitness.com", perms: "Daily operations, member registration, payment recording, receipts" },
-            { role: "Floor Manager", email: "manager@msfitness.com", perms: "Dashboard KPIs, expiry pipeline monitoring, revenue auditing" },
+            { role: "Floor Manager", email: "manager@msfitness.com", perms: "Dashboard KPIs, renewals monitoring, revenue auditing" },
           ].map((u, i) => (
             <div key={i} className="p-4 rounded-2xl bg-zinc-100 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>

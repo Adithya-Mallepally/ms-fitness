@@ -53,11 +53,34 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    const possibleCodes = [searchTarget];
+    const numericPart = searchTarget.replace(/\D/g, "");
+    if (numericPart.length === 4) {
+      possibleCodes.push(`MSF-${numericPart}`);
+      possibleCodes.push(`MSF${numericPart}`);
+      possibleCodes.push(numericPart);
+    } else if (/^\d+$/.test(searchTarget)) {
+      possibleCodes.push(`MSF-${searchTarget}`);
+      possibleCodes.push(`MSF-${searchTarget.padStart(4, "0")}`);
+      possibleCodes.push(searchTarget);
+    }
+
+    if (searchTarget.toUpperCase().startsWith("MSF-")) {
+      possibleCodes.push(searchTarget.toUpperCase());
+      const rawNum = searchTarget.replace(/^MSF-/i, "");
+      if (rawNum) {
+        possibleCodes.push(rawNum);
+        possibleCodes.push(`MSF-${rawNum}`);
+      }
+    }
+
     // 2. Lookup member in database
     const member = await prisma.member.findFirst({
       where: {
         OR: [
+          { memberCode: { in: possibleCodes } },
           { memberCode: { equals: searchTarget } },
+          { memberCode: { equals: `MSF-${searchTarget}` } },
           { phone: { equals: searchTarget } },
           { id: { equals: searchTarget } },
         ],

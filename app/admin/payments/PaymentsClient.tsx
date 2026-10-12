@@ -132,13 +132,17 @@ export default function PaymentsClient({
                             memberName: `${p.member.firstName} ${p.member.lastName}`,
                             memberCode: p.member.memberCode,
                             phone: p.member.phone,
+                            email: p.member.email,
+                            gender: p.member.gender,
                             planName: p.membership.plan.name,
+                            durationMonths: p.membership.plan.durationMonths,
                             amount: p.amount,
                             paymentMethod: p.paymentMethod,
                             transactionRef: p.transactionRef,
                             startDate: p.membership.startDate,
                             endDate: p.membership.endDate,
                             paidAt: p.paidAt,
+                            notes: p.notes,
                           })
                         }
                         className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-zinc-900 dark:bg-zinc-800 text-white dark:text-zinc-200 hover:bg-gold-500 hover:text-black font-semibold transition-colors shadow-sm"

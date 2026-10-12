@@ -275,13 +275,17 @@ export default function MemberProfileClient({
                             memberName: `${member.firstName} ${member.lastName}`,
                             memberCode: member.memberCode,
                             phone: member.phone,
+                            email: member.email,
+                            gender: member.gender,
                             planName: ms.plan.name,
+                            durationMonths: ms.plan.durationMonths,
                             amount: p.amount,
                             paymentMethod: p.paymentMethod,
                             transactionRef: p.transactionRef,
                             startDate: ms.startDate,
                             endDate: ms.endDate,
                             paidAt: p.paidAt,
+                            notes: member.notes,
                           })
                         }
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-900 dark:bg-zinc-800 text-white dark:text-zinc-200 hover:bg-gold-500 hover:text-black font-semibold transition-colors shadow-sm"

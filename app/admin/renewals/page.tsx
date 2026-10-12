@@ -55,16 +55,16 @@ export default async function AdminRenewalsPage({
   return (
     <div className="space-y-8 max-w-6xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-zinc-800/80">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
         <div>
           <span className="text-xs font-mono uppercase tracking-widest text-gold-600 dark:text-gold-500 font-bold">
-            Membership Retention &amp; Expiry Tracking
+            Renewal Status &amp; Expiry Tracking
           </span>
           <h1 className="font-display text-2xl sm:text-3xl font-extrabold uppercase tracking-wider text-zinc-950 dark:text-white">
-            RENEWAL PIPELINE
+            MEMBERSHIP RENEWALS
           </h1>
           <p className="text-xs text-zinc-600 dark:text-zinc-400 font-light mt-1">
-            Automated tracking of upcoming membership lapses. Contact members and issue one-click renewals.
+            Track upcoming renewals, expiring memberships, and lapsed passes. Issue instant renewals with one click.
           </p>
         </div>
 
@@ -79,7 +79,7 @@ export default async function AdminRenewalsPage({
       </div>
 
       {/* Tabs Switcher */}
-      <div className="flex flex-wrap gap-2.5 sm:gap-3 border-b border-zinc-200 dark:border-zinc-800 pb-4">
+      <div className="flex flex-wrap gap-2.5 sm:gap-3">
         {[
           {
             key: "URGENT",
@@ -119,7 +119,7 @@ export default async function AdminRenewalsPage({
         ))}
       </div>
 
-      {/* Pipeline Members Table */}
+      {/* Membership Renewals Table */}
       <div className="rounded-2xl sm:rounded-3xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800/80 overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs min-w-[760px]">
@@ -137,7 +137,7 @@ export default async function AdminRenewalsPage({
               {activeList.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-12 text-center text-zinc-500 text-xs">
-                    No members currently in this expiry queue.
+                    No members currently due for renewal in this queue.
                   </td>
                 </tr>
               ) : (
